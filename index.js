@@ -48,23 +48,32 @@ let fav10Movies = [
   }
 ];
 
+//Static file path
 app.use(express.static('public'));
+
+//Console log all requests to terminal
 app.use(morgan('common'));
 app.use(bodyParser.json());
 app.use(methodOverride());
 
+//Root folder
 app.get('/', (req, res) => {                  
   res.send('Welcome to Dyson\'s app!');
 });
 
+//call top 10 movies
 app.get('/movies', (req, res) => {                  
   res.json(fav10Movies);
 });
 
+
+//Port listener
 app.listen(8080, () => {
   console.log('Dyson\'s app is listening on port 8080.');
 });
 
+
+//Error Handling
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
