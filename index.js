@@ -3,6 +3,7 @@ const app = express();
 morgan = require('morgan'),
 bodyParser = require('body-parser'),
 methodOverride = require('method-override');
+const { v4: uuidv4 } = require('uuid');
 
 let movies = [
   {
@@ -82,7 +83,7 @@ let movies = [
     genre: 'Neo-Noir',
     director: {
       name: 'Clint Eastwood',
-      bio: 'Clinton Eastwood Jr. is an American actor, film director, composer, and producer. ',
+      bio: 'Clinton Eastwood Jr. is an American actor, film director, composer, and producer.',
       born: '31 May 1930',
       died: '-'
   }},
@@ -105,7 +106,27 @@ let users = [
     username: 'Dyson',
     password: 'password1',
     email: 'dyson@gmail.com',
-    }
+    favMovies: [
+      {
+     title: 'Inception',
+     genre: 'Fantasy/Thriller',
+ 
+   }]
+    
+  },
+  {
+    id: 2,
+    username: 'Francis',
+    password: 'password2',
+    email: 'francis@gmail.com',
+    favMovies: [
+      {
+     title: 'Inception',
+     genre: 'Fantasy/Thriller',
+ 
+   }]
+    
+  }
 ];
 
 //Static file path
@@ -134,17 +155,17 @@ app.get('/movies/:title', (req, res) => {
 });
 
 //Return data about a genre (description) by name/title (e.g., “Thriller”)
-app.get('/genres/:title', (req, res) => {
+app.get('/movies/genres/:title', (req, res) => {
 	res.json(movies.find((genre) => 
 		{ return genre.title === req.params.title }));
 });
 
 
 
-//Return data about a director (bio, birth year, death year) by name
-app.get('/movies/directors/:name', (req, res) => {
-  res.json(movies.find((movie) => 
-  { return movie.director.name === req.params.name }));
+//Return director bio by name
+app.get('/movies/bio/:name', (req, res) => {
+  const director = movies.find((u) => u.director.name == req.params.name); 
+  res.status(200).send(director.director.bio);
 });
 
 //Get list of users
@@ -160,11 +181,15 @@ app.post('/users', (req, res) => {
 		const message = 'Missing Username in request body';
 		res.status(400).send(message);
 	} else {
-		newUser.id = uuid.v4();
+		newUser.id = uuidv4();
 		users.push(newUser);
 		res.status(201).send(newUser);
 	}
 });
+
+
+
+
 
 
 
@@ -175,15 +200,27 @@ app.put('/users/:username', (req, res) => {
 });
 
 // Allow users to add a movie to their list of favorites (showing only a text that a movie has been added—more on this later)
-app.put('/users/movies/:favorites', (req, res) => {
-	let userFavorite = movies.find((movie) => 
-	res.status(201).send('Movie added to favorites'));
+// app.get('/users/favorites/:id', (req, res) => {
+
+//   const user = users.find((u) => u.id ==req.params.id); 
+//   res.status(200).send(user.favMovies);
+	
+// });
+
+app.post('/users/favorites/:id/:title', (req, res) => {
+
+  const user = users.find((u) => u.id ==req.params.id);
+  const favs = user.favMovies.filter((m)=>m.title != req.params.title)
+  user.favMovies = [...favs];
+  res.status(200).send(user);
 });
 
 // Allow users to remove a movie from their list of favorites (showing only a text that a movie has been removed—more on this later)
-app.delete('/users/movies/:favorites', (req, res) => {
-	let userFavorite = movies.find((movie) => 
-	res.status(201).send('Movie deleted from favorites'));
+app.delete('/favourite/delete/:id/:title', (req, res) => {
+  const user = users.find((u) => u.id ==req.params.id);
+  const favs = user.favMovies.filter((m)=>m.title != req.params.title)
+  user.favMovies = [...favs];
+  res.status(200).send(user);
 });
 
 // Allow existing users to deregister (showing only a text that a user email has been removed—more on this later)
