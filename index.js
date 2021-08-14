@@ -1,242 +1,218 @@
-const express = require('express');
+const express = require("express");
+
+//const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
+morgan = require('morgan');
+
+//const movies = require("./moviedata.js");
+//const users  = require("./userdata.js");
 const app = express();
-morgan = require('morgan'),
-bodyParser = require('body-parser'),
-methodOverride = require('method-override');
+app.use(express.json());
 const { v4: uuidv4 } = require('uuid');
+app.use(morgan('common'));
 
-let movies = [
-  {
-    title: 'Face/Off',
-    genre: 'Action Thriller',
-    director: {
-      name: 'John Woo',
-      bio: 'John Woo Yu-Sen SBS is a Chinese film director, producer and screenwriter of action genre films in the Hong Kong film industry.',
-      born: '1 May 1946',
-      died: '-'
-  }},
-  {
-    title: 'Lord of the Rings',
-    genre: 'Fantasy Adventure',
-    director: {
-      name: 'Peter Jackson',
-      bio: 'Sir Peter Robert Jackson ONZ KNZM is a New Zealand film director, producer, and screenwriter.',
-      born: '31 October 1961',
-      died: '-'
-  }},
-  {
-    title: 'Indiana Jones and the Last Crusade',
-    genre: 'Action-Adventure',
-    director: {
-      name: 'Steven Spielberg',
-      bio: 'Steven Allan Spielberg is an American film director, producer, and screenwriter.',
-      born: '18 December 1946',
-      died: '-'
-  }},
-  {
-    title: 'The Shawshank Redemption',
-    genre: 'Drama/Thriller',
-    director: {
-      name: 'Frank Darabont',
-      bio: 'Frank Árpád Darabont is a French-American film director, screenwriter and producer of Hungarian descent.',
-      born: '28 January 1959',
-      died: '-'
-  }},
-  {
-    title: 'Apocalypto',
-    genre: 'Historical/Adventure/Thriller',
-    director: {
-      name: 'Mel Gibson',
-      bio: 'Mel Columcille Gerard Gibson is an American actor, film director, producer, and screenwriter. ',
-      born: '3 January 1956',
-      died: '-'
-  }},
-  {
-    title: 'The Sound of Music',
-    genre: 'Drama/Musical',
-    director: {
-      name: 'Robert Wise',
-      bio: 'Robert Earl Wise was an American film director, producer, and editor.',
-      born: '10 September 1914',
-      died: '14 September 2005'
-  }},
-  {
-    title: 'The Godfather',
-    genre: 'Crime/Thriller',
-    director: {
-      name: 'Francis Ford Coppola',
-      bio: 'Francis Ford Coppola is an American film director, producer, and screenwriter. ',
-      born: '7 April 1939',
-      died: '-'
-  }},
-  {
-    title: 'The Good, the Bad and the Ugly',
-    genre: 'Western/Thriller',
-    director: {
-      name: 'Sergio Leone',
-      bio: 'Sergio Leone was an Italian film director, producer and screenwriter, credited as the creator of the Spaghetti Western genre ',
-      born: '29 January 1929',
-      died: '30	April 1989'
-  }},
-    {
-    title: 'Mystic River',
-    genre: 'Neo-Noir',
-    director: {
-      name: 'Clint Eastwood',
-      bio: 'Clinton Eastwood Jr. is an American actor, film director, composer, and producer.',
-      born: '31 May 1930',
-      died: '-'
-  }},
-  
-  {
-    title: 'Inception',
-    genre: 'Fantasy/Thriller',
-    director: {
-      name: 'Christopher Nolan',
-      bio: 'Christopher Edward Nolan CBE is a British-American film director, producer, and screenwriter.',
-      born: '30 July 1970',
-      died: '-'
-  }},
-];
+app.use(methodOverride());
+const mongoose = require('mongoose');
+const Models = require('./model.js');
+const Movies = Models.Movie;
+const Users = Models.User;
 
 
-let users = [
-  {
-    id: 1,
-    username: 'Dyson',
-    password: 'password1',
-    email: 'dyson@gmail.com',
-    favMovies: [
-      {
-     title: 'Inception',
-     genre: 'Fantasy/Thriller',
- 
-   }]
-    
-  },
-  {
-    id: 2,
-    username: 'Francis',
-    password: 'password2',
-    email: 'francis@gmail.com',
-    favMovies: [
-      {
-     title: 'Inception',
-     genre: 'Fantasy/Thriller',
- 
-   }]
-    
-  }
-];
+mongoose.connect('mongodb://localhost:27017/movieApp', { useNewUrlParser: true, useUnifiedTopology: true });
 
 //Static file path
 app.use(express.static('public'));
 
-//Console log all requests to terminal
-app.use(morgan('common'));
-app.use(bodyParser.json());
-app.use(methodOverride());
+//1.Return a list of ALL movies to the user
+  app.get('/movies', (req, res) => {
+    Movies.find()
+    .then((movies) => {
+      res.status(201).json(movies);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Error: ' + error);
+    });
+    });
+    
 
-//Root folder
-app.get('/', (req, res) => {                  
-  res.send('Welcome to Dyson\'s Favorite Movie Database!');
+
+//2. Return data (description, genre, director, image URL, whether it’s featured or not) about a single movie by title to the user
+app.get('/movies/:Title', (req, res) => {
+    Movies.findOne({ Title: req.params.Title })
+      .then((movie) => {
+        res.json(movie);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+      });
+  });  
+
+
+//3. Return data about a genre (description) by name/title (e.g., “Thriller”)
+app.get('/movies/genre/:Name', (req, res) => {
+    Movies.find({ 'Genre.Name': req.params.Name })
+      .then((movie) => {
+        res.json(movie);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+      });
+  });  
+
+
+
+//4. Return data about a director by director name
+app.get('/movies/director/:Name', (req, res) => {
+  Movies.find({ 'Director.Name': req.params.Name })
+    .then((movie) => {
+      res.json(movie);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
+});  
+
+
+//Return list of users
+//  app.get('/users', (req, res) => {
+//     res.status(200).send(users);
+//  })   
+
+//5. Allow new users to register
+app.post('/users/:Username', (req, res) => {
+  Users.findOne({ Username: req.body.Username })
+    .then((user) => {
+      if (user) {
+        return res.status(400).send(req.body.Username + 'already exists');
+      } else {
+        Users
+          .create({
+            Username: req.body.Username,
+            Password: req.body.Password,
+            Email: req.body.Email,
+            Birthday: req.body.Birthday
+          })
+          .then((user) =>{res.status(201).json(user) })
+        .catch((error) => {
+          console.error(error);
+          res.status(500).send('Error: ' + error);
+        })
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Error: ' + error);
+    });
 });
 
-//Return a list of ALL movies to the user
-app.get('/movies', (req, res) => {                  
-  res.json(movies);
-});
 
-
-//Return data (description, genre, director, image URL, whether it’s featured or not) about a single movie by title to the user
-app.get('/movies/:title', (req, res) => {
-	res.json(movies.find((movie) => 
-		{ return movie.title === req.params.title }));
-});
-
-//Return data about a genre (description) by name/title (e.g., “Thriller”)
-app.get('/movies/genres/:title', (req, res) => {
-	res.json(movies.find((genre) => 
-		{ return genre.title === req.params.title }));
-});
-
-
-
-//Return director bio by name
-app.get('/movies/bio/:name', (req, res) => {
-  const director = movies.find((u) => u.director.name == req.params.name); 
-  res.status(200).send(director.director.bio);
-});
-
-//Get list of users
+//GET(READ) ALL USERS
 app.get('/users', (req, res) => {
-  res.json(users);
+Users.find()
+.then((users) => {
+  res.status(201).json(users);
+})
+.catch((error) => {
+  console.error(error);
+  res.status(500).send('Error: ' + error);
 });
-
-// Allow new users to register
-app.post('/users', (req, res) => {
-	let newUser = req.body;
-
-	if (!newUser.username) {
-		const message = 'Missing Username in request body';
-		res.status(400).send(message);
-	} else {
-		newUser.id = uuidv4();
-		users.push(newUser);
-		res.status(201).send(newUser);
-	}
 });
 
 
-
-
-
-
-
-// Allow users to update their user info (username)
-app.put('/users/:username', (req, res) => {
-	let user = users.find((user) => 
-			res.status(400).send('Username was not found.'));
+//GET USER BY USERNAME
+app.get('/users/:Username', (req, res) => {
+  Users.findOne({ Username: req.params.Username })
+    .then((user) => {
+      res.json(user);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
 });
 
-// Allow users to add a movie to their list of favorites (showing only a text that a movie has been added—more on this later)
-// app.get('/users/favorites/:id', (req, res) => {
 
-//   const user = users.find((u) => u.id ==req.params.id); 
-//   res.status(200).send(user.favMovies);
-	
-// });
-
-app.post('/users/favorites/:id/:title', (req, res) => {
-
-  const user = users.find((u) => u.id ==req.params.id);
-  const favs = user.favMovies.filter((m)=>m.title != req.params.title)
-  user.favMovies = [...favs];
-  res.status(200).send(user);
+//6. Allow users to update their user info (username, password, email, date of birth)
+app.put('/users/:Username', (req, res) => {
+  Users.findOneAndUpdate({ Username: req.params.Username }, { $set:
+    {
+      Username: req.body.Username,
+      Password: req.body.Password,
+      Email: req.body.Email,
+      Birthday: req.body.Birthday
+    }
+  },
+  { new: true }, // This line makes sure that the updated document is returned
+  (err, updatedUser) => {
+    if(err) {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    } else {
+      res.json(updatedUser);
+    }
+  });
 });
 
-// Allow users to remove a movie from their list of favorites (showing only a text that a movie has been removed—more on this later)
-app.delete('/favourite/delete/:id/:title', (req, res) => {
-  const user = users.find((u) => u.id ==req.params.id);
-  const favs = user.favMovies.filter((m)=>m.title != req.params.title)
-  user.favMovies = [...favs];
-  res.status(200).send(user);
+
+//7. Allow users to add a movie to their list of favorites
+app.post('/users/:Username/movies/:MovieID', (req, res) => {
+  Users.findOneAndUpdate({ Username: req.params.Username }, {
+     $push: { FavoriteMovies: req.params.MovieID }
+   },
+   { new: true }, // This line makes sure that the updated document is returned
+  (err, updatedUser) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    } else {
+      res.json(updatedUser);
+    }
+  });
 });
 
-// Allow existing users to deregister (showing only a text that a user email has been removed—more on this later)
-app.delete('/users/:username', (req, res) => {
-	let deRegister = users.find((user) => 
-	res.status(201).send('User email has been removed'));
+//8. Allow users to remove a movie from their list of favorites
+app.delete('/users/:Username/movies/:MovieID', (req, res) => {
+  Users.findOneAndUpdate({ Username: req.params.Username }, {
+     $pull: { FavoriteMovies: req.params.MovieID }
+   },
+   { new: true }, // This line makes sure that the updated document is returned
+  (err, updatedUser) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    } else {
+      res.json(updatedUser);
+    }
+  });
 });
 
-//Port listener
+
+//9. Allow existing users to deregister 
+app.delete('/users/:Username', (req, res) => {
+  Users.findOneAndRemove({ Username: req.params.Username })
+    .then((user) => {
+      if (!user) {
+        res.status(400).send(req.params.Username + ' was not found');
+      } else {
+        res.status(200).send(req.params.Username + ' was deleted.');
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
+});
+
 app.listen(8080, () => {
-  console.log('Dyson\'s app is listening on port 8080.');
+    console.log("Dyson's movie server started at port 8080!")
 });
-
 
 //Error Handling
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
-});
+    console.error(err.stack);
+    res.status(500).send('Something\'s broken!');
+  });
