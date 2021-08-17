@@ -1,21 +1,30 @@
 const express = require("express");
 
-//const bodyParser = require('body-parser');
+
+
+const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 morgan = require('morgan');
 
 //const movies = require("./moviedata.js");
 //const users  = require("./userdata.js");
 const app = express();
+
 app.use(express.json());
 const { v4: uuidv4 } = require('uuid');
 app.use(morgan('common'));
 
 app.use(methodOverride());
 const mongoose = require('mongoose');
-const Models = require('./model.js');
+const Models = require('./models.js');
 const Movies = Models.Movie;
 const Users = Models.User;
+
+app.use(bodyParser.urlencoded({ extended: true }));
+let auth = require('./auth')(app);
+
+const passport = require('passport');
+require('./passport');
 
 
 mongoose.connect('mongodb://localhost:27017/movieApp', { useNewUrlParser: true, useUnifiedTopology: true });
@@ -24,7 +33,7 @@ mongoose.connect('mongodb://localhost:27017/movieApp', { useNewUrlParser: true, 
 app.use(express.static('public'));
 
 //1.Return a list of ALL movies to the user
-  app.get('/movies', (req, res) => {
+  app.get('/movies', passport.authenticate('jwt', {session: false}), (req, res) => {
     Movies.find()
     .then((movies) => {
       res.status(201).json(movies);
