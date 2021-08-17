@@ -47,7 +47,7 @@ app.use(express.static('public'));
 
 
 //2. Return data (description, genre, director, image URL, whether it’s featured or not) about a single movie by title to the user
-app.get('/movies/:Title', (req, res) => {
+app.get('/movies/:Title', passport.authenticate('jwt', {session: false}),  (req, res) => {
     Movies.findOne({ Title: req.params.Title })
       .then((movie) => {
         res.json(movie);
@@ -60,7 +60,7 @@ app.get('/movies/:Title', (req, res) => {
 
 
 //3. Return data about a genre (description) by name/title (e.g., “Thriller”)
-app.get('/movies/genre/:Name', (req, res) => {
+app.get('/movies/genre/:Name' , passport.authenticate('jwt', {session: false}), (req, res) => {
     Movies.find({ 'Genre.Name': req.params.Name })
       .then((movie) => {
         res.json(movie);
@@ -74,7 +74,7 @@ app.get('/movies/genre/:Name', (req, res) => {
 
 
 //4. Return data about a director by director name
-app.get('/movies/director/:Name', (req, res) => {
+app.get('/movies/director/:Name' , passport.authenticate('jwt', {session: false}), (req, res) => {
   Movies.find({ 'Director.Name': req.params.Name })
     .then((movie) => {
       res.json(movie);
@@ -146,7 +146,7 @@ app.get('/users/:Username', (req, res) => {
 
 
 //6. Allow users to update their user info (username, password, email, date of birth)
-app.put('/users/:Username', (req, res) => {
+app.put('/users/:Username' , passport.authenticate('jwt', {session: false}), (req, res) => {
   Users.findOneAndUpdate({ Username: req.params.Username }, { $set:
     {
       Username: req.body.Username,
@@ -168,7 +168,7 @@ app.put('/users/:Username', (req, res) => {
 
 
 //7. Allow users to add a movie to their list of favorites
-app.post('/users/:Username/movies/:MovieID', (req, res) => {
+app.post('/users/:Username/movies/:MovieID', passport.authenticate('jwt', {session: false}), (req, res) => {
   Users.findOneAndUpdate({ Username: req.params.Username }, {
      $push: { FavoriteMovies: req.params.MovieID }
    },
@@ -184,7 +184,7 @@ app.post('/users/:Username/movies/:MovieID', (req, res) => {
 });
 
 //8. Allow users to remove a movie from their list of favorites
-app.delete('/users/:Username/movies/:MovieID', (req, res) => {
+app.delete('/users/:Username/movies/:MovieID' , passport.authenticate('jwt', {session: false}), (req, res) => {
   Users.findOneAndUpdate({ Username: req.params.Username }, {
      $pull: { FavoriteMovies: req.params.MovieID }
    },
@@ -201,7 +201,7 @@ app.delete('/users/:Username/movies/:MovieID', (req, res) => {
 
 
 //9. Allow existing users to deregister 
-app.delete('/users/:Username', (req, res) => {
+app.delete('/users/:Username'  , passport.authenticate('jwt', {session: false}), (req, res) => {
   Users.findOneAndRemove({ Username: req.params.Username })
     .then((user) => {
       if (!user) {
