@@ -255,5 +255,5 @@ app.listen(port, '0.0.0.0',() => {
 //Error Handling
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).send('Something is broken!');
+    res.status(500).send('Something broke!');
   });
