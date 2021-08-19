@@ -32,7 +32,8 @@ require('./passport');
 const { check, validationResult } = require('express-validator');
 
 
-mongoose.connect('mongodb://localhost:27017/movieApp', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+//mongoose.connect('mongodb://localhost:27017/movieApp', { useNewUrlParser: true, useUnifiedTopology: true });
 
 //Static file path
 app.use(express.static('public'));
