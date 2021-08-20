@@ -169,7 +169,7 @@ app.put('/users/:Username' ,
 
 [check('Username', 'Username is required!').isLength({min:5}),
 check('Username', 'Username cannot contain non-alphanumeric characters!').isAlphanumeric(),
-check('Password', 'Password is required').not().isEmpty(),
+check('Password', 'Password is required!').not().isEmpty(),
 check('Email', 'Email does not appear to be valid').isEmail()
 ], (req, res) => {
   // check the validation object for errors
