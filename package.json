@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodeon index.js"
+    "start": "nodemon index.js"
   },
-  "author": "Dyson.Francis",
+  "author": "D.F",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
@@ -16,7 +16,6 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "method-override": "^3.0.0",
-    "mongoose": "^5.13.7",
     "morgan": "^1.10.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
