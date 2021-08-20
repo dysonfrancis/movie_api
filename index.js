@@ -98,10 +98,10 @@ app.get('/movies/director/:Name' , passport.authenticate('jwt', {session: false}
 
 //5. Allow new users to register
 app.post('/users/:Username', 
-[check('Username', 'Username is required!').isLength({min:5}),
+[check('Username', 'A Username is required!').isLength({min:5}),
 check('Username', 'Username cannot contain non-alphanumeric characters!').isAlphanumeric(),
-check('Password', 'Password is required').not().isEmpty(),
-check('Email', 'Email does not appear to be valid').isEmail()
+check('Password', 'A Password is required').not().isEmpty(),
+check('Email', 'The Email address does not appear to be valid').isEmail()
 ], (req, res) => {
   // check the validation object for errors
   let errors = validationResult(req);
