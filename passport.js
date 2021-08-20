@@ -20,12 +20,12 @@ Users.findOne({ Username: username }, (error, user) => {
   }
 
   if (!user) {
-    console.log('incorrect username');
+    console.log('Incorrect username');
     return callback(null, false, {message: 'Incorrect username.'});
     }
     
     if (!user.validatePassword(password)) {
-        console.log('incorrect password');
+        console.log('Incorrect password');
         return callback(null, false, {message: 'Incorrect password.'});
       }
   
